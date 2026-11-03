@@ -1,0 +1,7 @@
+metric,question,measurement
+task_completion,Did the system produce the required result or safe non-answer?,"Expected status, oracle values, and required adaptation"
+tool_call_correctness,Did it use the approved tools appropriately?,"Only approved tools were used, and an analysis calculation was performed exactly when the expected terminal status required one"
+trajectory_efficiency,Did it stay within the allowed analysis budget?,"Analysis calls stayed within the case-specific limit, and the run did not terminate because its budget was exhausted"
+grounding_evidence_use,Are outputs supported by computed evidence?,"Oracle match, zero missing evidence, and no calculation for safe non-answers"
+recovery_quality,Did it recover from an injected failure?,Recovery cases test a transient model timeout and invalid structured tool arguments; otherwise N/A
+termination_quality,Did it stop with the right status at the right time?,"Expected terminal status, nonempty reason, and expected calculation count"

@@ -1,0 +1,3 @@
+system,failure_type,count
+adaptive_agent_live_eval_set_r2,task_completion_failure,5
+adaptive_agent_live_eval_set_r2,tool_call_error,1

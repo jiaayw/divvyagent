@@ -1,0 +1,99 @@
+case_id,target,selector,field,expected_value
+J01,1,"{""start_month"":1}",trip_count,138651
+J01,2,"{""start_month"":2}",trip_count,151901
+J01,3,"{""start_month"":3}",trip_count,298130
+J01,4,"{""start_month"":4}",trip_count,371376
+J01,5,"{""start_month"":5}",trip_count,502615
+J01,6,"{""start_month"":6}",trip_count,678801
+J01,7,"{""start_month"":7}",trip_count,763458
+J01,8,"{""start_month"":8}",trip_count,790317
+J01,9,"{""start_month"":9}",trip_count,714562
+J01,10,"{""start_month"":10}",trip_count,646096
+J01,11,"{""start_month"":11}",trip_count,356512
+J01,12,"{""start_month"":12}",trip_count,140522
+J02,1,"{""start_month"":8}",trip_count,790317
+J02,2,"{""start_month"":8,""member_casual"":""casual""}",trip_count,337878
+J02,3,"{""start_month"":8,""member_casual"":""member""}",trip_count,452439
+J03,1,"{""start_weekday"":""Saturday""}",trip_count,864405
+J03,2,"{""start_weekday"":""Saturday"",""start_hour"":15}",trip_count,69828
+J04,1,"{""start_month"":5}",trip_count,502615
+J04,2,"{""start_month"":6}",trip_count,678801
+J04,3,"{""start_month"":5,""member_casual"":""casual""}",trip_count,182770
+J04,4,"{""start_month"":6,""member_casual"":""casual""}",trip_count,292006
+J04,5,"{""start_month"":5,""member_casual"":""member""}",trip_count,319845
+J04,6,"{""start_month"":6,""member_casual"":""member""}",trip_count,386795
+J05,1,"{""start_month"":1}",average_duration_minutes,10.12
+J05,2,"{""start_month"":2}",average_duration_minutes,10.217
+J05,3,"{""start_month"":3}",average_duration_minutes,12.771
+J05,4,"{""start_month"":4}",average_duration_minutes,13.135
+J05,5,"{""start_month"":5}",average_duration_minutes,14.741
+J05,6,"{""start_month"":6}",average_duration_minutes,16.211
+J05,7,"{""start_month"":7}",average_duration_minutes,16.11
+J05,8,"{""start_month"":8}",average_duration_minutes,16.246
+J05,9,"{""start_month"":9}",average_duration_minutes,14.777
+J05,10,"{""start_month"":10}",average_duration_minutes,13.796
+J05,11,"{""start_month"":11}",average_duration_minutes,12.388
+J05,12,"{""start_month"":12}",average_duration_minutes,11.578
+J06,1,"{""start_month"":2,""member_casual"":""member""}",trip_count,124144
+J06,2,"{""start_month"":3,""member_casual"":""member""}",trip_count,212268
+J06,3,"{""start_month"":3,""member_casual"":""member"",""start_weekday"":""Monday""}",trip_count,37305
+Y01,1,"{""member_casual"":""casual""}",average_duration_minutes,19.132
+Y01,2,"{""member_casual"":""member""}",average_duration_minutes,11.952
+Y02,1,"{""member_casual"":""casual""}",average_duration_minutes,19.132
+Y02,2,"{""member_casual"":""member""}",average_duration_minutes,11.952
+Y02,3,"{""member_casual"":""casual"",""rideable_type"":""classic_bike""}",average_duration_minutes,29.257
+Y02,4,"{""member_casual"":""member"",""rideable_type"":""classic_bike""}",average_duration_minutes,13.625
+Y02,5,"{""member_casual"":""casual"",""rideable_type"":""electric_bike""}",average_duration_minutes,14.035
+Y02,6,"{""member_casual"":""member"",""rideable_type"":""electric_bike""}",average_duration_minutes,11.017
+Y03,1,"{""start_month"":1}",trip_count,138651
+Y03,2,"{""start_month"":1,""start_weekday"":""Monday""}",trip_count,16401
+Y03,3,"{""start_month"":1,""start_weekday"":""Tuesday""}",trip_count,18652
+Y03,4,"{""start_month"":1,""start_weekday"":""Wednesday""}",trip_count,25796
+Y03,5,"{""start_month"":1,""start_weekday"":""Thursday""}",trip_count,28622
+Y03,6,"{""start_month"":1,""start_weekday"":""Friday""}",trip_count,21596
+Y03,7,"{""start_month"":1,""start_weekday"":""Saturday""}",trip_count,16199
+Y03,8,"{""start_month"":1,""start_weekday"":""Sunday""}",trip_count,11385
+Y04,1,"{""start_month"":6,""member_casual"":""casual""}",trip_count,292006
+Y04,2,"{""start_month"":6,""member_casual"":""member""}",trip_count,386795
+Y05,1,"{""start_station_name"":""Kingsbury St & Kinzie St""}",trip_count,40611
+Y05,2,"{""start_station_name"":""Kingsbury St & Kinzie St"",""start_month"":8}",trip_count,5036
+Y06,1,"{""start_weekday"":""Sunday""}",average_duration_minutes,17.343
+Y06,2,"{""start_weekday"":""Sunday"",""member_casual"":""casual""}",average_duration_minutes,22.146
+Y06,3,"{""start_weekday"":""Sunday"",""member_casual"":""member""}",average_duration_minutes,13.184
+Y08,1,"{""start_month"":8,""member_casual"":""member""}",trip_count,452439
+Y08,2,"{""start_month"":8,""start_hour"":17,""member_casual"":""member""}",trip_count,47247
+Y09,1,"{""start_weekday"":""Wednesday""}",average_duration_minutes,12.667
+Y09,2,"{""start_weekday"":""Wednesday"",""rideable_type"":""classic_bike""}",average_duration_minutes,15.891
+Y09,3,"{""start_weekday"":""Wednesday"",""rideable_type"":""electric_bike""}",average_duration_minutes,11.01
+Y10,1,"{""end_station_name"":""Kingsbury St & Kinzie St"",""member_casual"":""member""}",trip_count,31381
+Y10,2,"{""end_station_name"":""Kingsbury St & Kinzie St"",""start_month"":7,""member_casual"":""member""}",trip_count,3730
+C02,1,"{""start_month"":8,""member_casual"":""casual""}",trip_count,337878
+C02,2,"{""start_month"":8,""member_casual"":""casual"",""start_station_name"":""Navy Pier""}",trip_count,11133
+C03,1,"{""end_station_name"":""Kingsbury St & Kinzie St""}",trip_count,40013
+C03,2,"{""end_station_name"":""Kingsbury St & Kinzie St"",""member_casual"":""casual""}",average_duration_minutes,11.731
+C03,3,"{""end_station_name"":""Kingsbury St & Kinzie St"",""member_casual"":""member""}",average_duration_minutes,8.458
+C06,1,"{""start_month"":8,""rideable_type"":""classic_bike""}",trip_count,281050
+C06,2,"{""start_month"":8}",trip_count,790317
+C08,1,"{""start_weekday"":""Monday""}",trip_count,731020
+C08,2,"{""start_weekday"":""Tuesday""}",trip_count,788603
+C08,3,"{""start_weekday"":""Wednesday""}",trip_count,771692
+C08,4,"{""start_weekday"":""Thursday""}",trip_count,834050
+C08,5,"{""start_weekday"":""Friday""}",trip_count,849066
+C08,6,"{""start_weekday"":""Saturday""}",trip_count,864405
+C08,7,"{""start_weekday"":""Sunday""}",trip_count,714105
+C10,1,"{""rideable_type"":""electric_bike"",""member_casual"":""member""}",trip_count,2278119
+C10,2,"{""rideable_type"":""electric_bike"",""member_casual"":""casual""}",trip_count,1326802
+C10,3,"{""start_month"":9,""rideable_type"":""electric_bike"",""member_casual"":""member""}",trip_count,291256
+H05,1,"{""start_month"":8,""rideable_type"":""electric_bike""}",average_duration_minutes,13.599
+H05,2,"{""start_month"":8,""rideable_type"":""electric_bike"",""member_casual"":""casual""}",average_duration_minutes,15.633
+H05,3,"{""start_month"":8,""rideable_type"":""electric_bike"",""member_casual"":""member""}",average_duration_minutes,12.055
+H06,1,"{""start_month"":1,""member_casual"":""member""}",average_duration_minutes,9.798
+H06,2,"{""start_month"":1,""member_casual"":""member"",""rideable_type"":""classic_bike""}",average_duration_minutes,11.096
+H06,3,"{""start_month"":1,""member_casual"":""member"",""rideable_type"":""electric_bike""}",average_duration_minutes,9.019
+H07,1,"{""start_weekday"":""Saturday"",""rideable_type"":""classic_bike""}",trip_count,311727
+H07,2,"{""start_weekday"":""Saturday"",""start_hour"":14,""rideable_type"":""classic_bike""}",trip_count,26770
+H08,1,"{""end_station_name"":""DuSable Lake Shore Dr & Monroe St"",""member_casual"":""casual""}",trip_count,29125
+H08,2,"{""end_station_name"":""DuSable Lake Shore Dr & Monroe St"",""member_casual"":""casual"",""rideable_type"":""classic_bike""}",trip_count,17146
+H08,3,"{""end_station_name"":""DuSable Lake Shore Dr & Monroe St"",""member_casual"":""casual"",""rideable_type"":""electric_bike""}",trip_count,11979
+Y11,1,"{""start_hour"":17,""member_casual"":""casual""}",trip_count,190654
+Y11,2,"{""start_hour"":17,""start_weekday"":""Friday"",""member_casual"":""casual""}",trip_count,31872

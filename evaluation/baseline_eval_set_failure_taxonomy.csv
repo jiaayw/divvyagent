@@ -1,0 +1,5 @@
+system,failure_type,count
+keyword_router,task_completion_failure,20
+keyword_router,tool_call_error,2
+fixed_one_calculation,task_completion_failure,25
+fixed_one_calculation,tool_call_error,2

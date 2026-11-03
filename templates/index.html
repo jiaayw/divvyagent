@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Divvy Adaptive Agent</title>
+
+<style>
+:root {
+  --surface: #ffffff;
+  --surface-raised: #f6f8fa;
+  --border: #d0d7de;
+  --border-focus: #0969da;
+
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #6e7781;
+
+  --accent: #0969da;
+  --accent-hover: #0550ae;
+
+  --ok: #1a7f37;
+  --warn: #9a6700;
+  --err: #cf222e;
+  --info: #0969da;
+
+  --mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0d1117;
+    --surface-raised: #161b22;
+    --border: #30363d;
+    --border-focus: #58a6ff;
+    --text-primary: #e6edf3;
+    --text-secondary: #9198a1;
+    --text-muted: #7d8590;
+    --accent: #388bfd;
+    --accent-hover: #58a6ff;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --err: #f85149;
+    --info: #58a6ff;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px));
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.container {
+  display: flex;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-block: 24px;
+}
+
+.sidebar { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 6px; padding: 20px; }
+.card-header { font-size: 16px; font-weight: 600; margin: 0 0 14px; }
+h3.section { margin: 22px 0 10px; font-size: 15px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; min-width: 0; }
+
+label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+
+input, textarea, select {
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text-primary);
+  width: 100%;
+}
+input:focus, textarea:focus, select:focus, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+textarea { resize: vertical; min-height: 90px; }
+.input-help { font-size: 12px; color: var(--text-muted); }
+
+button {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondary { background: var(--surface); color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); }
+.btn-secondary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-block { width: 100%; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
+.badge.completed { color: var(--ok); }
+.badge.running, .badge.clarification_needed { color: var(--info); }
+.badge.blocked, .badge.budget_exhausted { color: var(--warn); }
+.badge.failed { color: var(--err); }
+.badge.mock { color: var(--warn); }
+
+.status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.muted { color: var(--text-muted); font-size: 13px; }
+
+.notice { padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--warn); background: var(--surface); font-size: 13px; color: var(--text-secondary); margin-top: 12px; }
+.notice.error { border-left-color: var(--err); color: var(--err); }
+
+.answer { line-height: 1.65; margin: 0 0 8px; }
+ul.plain { margin: 6px 0 0; padding-left: 20px; color: var(--text-secondary); font-size: 13px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 16px; }
+.stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); }
+.stat-value { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.chart-container img { max-width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--border); background: #fff; }
+
+.timeline { display: flex; flex-direction: column; gap: 8px; }
+.step { padding: 10px 12px; border-left: 3px solid var(--border); background: var(--surface); border-radius: 3px; font-size: 13px; }
+.step.decision { border-left-color: var(--accent); }
+.step.tool_call { border-left-color: var(--info); }
+.step.ok { border-left-color: var(--ok); }
+.step.bad { border-left-color: var(--err); }
+.step.validation { border-left-color: var(--warn); }
+.step.final { border-left-color: var(--ok); }
+.step-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); margin-bottom: 4px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.step-title .time { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 4px 0; }
+.kv dt { color: var(--text-muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+
+table.data { border-collapse: collapse; margin: 6px 0; font-size: 12px; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { border: 1px solid var(--border); padding: 3px 8px; text-align: left; }
+table.data th { background: var(--surface-raised); color: var(--text-secondary); font-weight: 600; }
+table.data td.num { text-align: right; }
+.table-wrap { overflow-x: auto; }
+
+.checks { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.check { font-size: 12px; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border); }
+.check.pass { color: var(--ok); border-color: var(--ok); }
+.check.fail { color: var(--err); border-color: var(--err); }
+
+details { margin-top: 6px; }
+summary { cursor: pointer; color: var(--text-secondary); font-size: 12px; }
+pre { margin: 6px 0 0; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text-secondary); max-height: 320px; overflow: auto; }
+
+.phases { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 12px; color: var(--text-secondary); }
+.phases .arrow { color: var(--text-muted); }
+.phases .phase { padding: 1px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 900px) {
+  .container { flex-direction: column; }
+  .sidebar { width: 100%; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <aside class="sidebar">
+    <div class="card">
+      <h2 class="card-header">Model configuration</h2>
+      <div class="form-group">
+        <label for="api-key">API key (course Portkey key or OpenAI)</label>
+        <input type="password" id="api-key" placeholder="sk-..." autocomplete="off">
+        <span class="input-help" id="key-help">Saved to the local .env file</span>
+      </div>
+      <div class="form-group">
+        <label for="base-url">Base URL</label>
+        <input type="text" id="base-url" autocomplete="off" placeholder="blank = api.openai.com">
+      </div>
+      <div class="form-group">
+        <label for="model">Model</label>
+        <input type="text" id="model" list="model-options" autocomplete="off">
+        <datalist id="model-options">
+          <option value="@30875-fall26-openai/gpt-5-nano">
+          <option value="gpt-4o-2024-08-06">
+          <option value="gpt-4.1-mini">
+        </datalist>
+      </div>
+      <div class="row form-group">
+        <div>
+          <label for="input-cost">Input $/1M tok</label>
+          <input type="number" id="input-cost" min="0" step="0.01">
+        </div>
+        <div>
+          <label for="output-cost">Output $/1M tok</label>
+          <input type="number" id="output-cost" min="0" step="0.01">
+        </div>
+      </div>
+      <button class="btn-primary btn-block" id="save-btn">Save configuration</button>
+      <div class="input-help" id="save-msg" role="status" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-header">Agent limits</h2>
+      <div class="row form-group">
+        <div><label for="max-turns">Model turns</label><input type="number" id="max-turns" value="5" min="1" max="10"></div>
+        <div><label for="max-tools">Tool calls</label><input type="number" id="max-tools" value="6" min="1" max="10"></div>
+      </div>
+      <div class="row form-group">
+        <div><label for="max-seconds">Seconds</label><input type="number" id="max-seconds" value="120" min="10" max="600"></div>
+        <div><label for="max-tokens">Tokens</label><input type="number" id="max-tokens" value="45000" min="1000" step="1000"></div>
+      </div>
+      <div class="form-group">
+        <label for="max-cost">Max cost (USD)</label>
+        <input type="number" id="max-cost" value="0.25" min="0.01" step="0.05">
+        <span class="input-help">The first tool call is the built-in dataset inspection.</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2 class="card-header">Ask a question about 2025 Divvy trips</h2>
+      <div class="form-group">
+        <label for="question">Question</label>
+        <textarea id="question" maxlength="1000" data-demo="{{ demo_question }}"></textarea>
+        <div class="chips" id="examples" aria-label="Example questions"></div>
+      </div>
+      <div class="row">
+        <button class="btn-primary" id="run-live-btn">Run with live model</button>
+        <button class="btn-secondary" id="run-mock-btn" title="Replays a scripted decision sequence through the real controller and tools. No API key or cost.">Run offline demo (scripted)</button>
+      </div>
+      <div class="notice" id="mock-note">The offline demo replays a <strong>scripted</strong> decision sequence through the real tools, dispatcher, and completion gate. It does not measure live-model quality.</div>
+    </div>
+
+    <div class="card hidden" id="results" aria-live="polite">
+      <h2 class="card-header">Result</h2>
+      <div id="status-container"></div>
+      <div id="report-container"></div>
+      <div id="stats-container"></div>
+      <div id="charts-container"></div>
+      <div id="trace-container"></div>
+      <div id="phase-container"></div>
+      <div id="raw-container"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const EXAMPLES = [
+  document.getElementById('question').dataset.demo,
+  'Compare the average trip duration of members and casual riders.',
+  'What are the five most-used start stations?',
+  'How many trips were taken in each month of 2025?',
+  'Which weekday has the most trips for casual riders?',
+  'Why did casual ridership grow in June?',
+];
+
+const $ = (id) => document.getElementById(id);
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => (
+    {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]
+  ));
+}
+
+function fmt(value) {
+  if (typeof value === 'number') {
+    return Number.isInteger(value) ? value.toLocaleString() : value.toLocaleString(undefined, {maximumFractionDigits: 3});
+  }
+  return esc(value);
+}
+
+function json(value) {
+  return esc(JSON.stringify(value, null, 2));
+}
+
+// ---------- configuration ----------
+async function loadConfig() {
+  try {
+    const config = await (await fetch('/api/config')).json();
+    $('base-url').value = config.base_url;
+    $('model').value = config.model;
+    $('input-cost').value = config.input_cost;
+    $('output-cost').value = config.output_cost;
+    $('key-help').textContent = config.api_key_set
+      ? 'A key is saved. Leave blank to keep it.'
+      : 'No key saved. Needed for live runs only.';
+  } catch (error) {
+    $('save-msg').textContent = 'Could not load configuration: ' + error.message;
+  }
+}
+
+async function saveConfig() {
+  $('save-msg').textContent = '';
+  try {
+    const response = await fetch('/api/config', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        api_key: $('api-key').value || undefined,
+        model: $('model').value,
+        base_url: $('base-url').value,
+        input_cost: $('input-cost').value,
+        output_cost: $('output-cost').value,
+      }),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || 'Save failed');
+    $('api-key').value = '';
+    $('save-msg').textContent = 'Saved.';
+    loadConfig();
+  } catch (error) {
+    $('save-msg').textContent = 'Failed: ' + error.message;
+  }
+}
+
+// ---------- running ----------
+async function run(mode) {
+  const question = $('question').value.trim();
+  if (mode === 'live' && !question) {
+    alert('Please enter a question.');
+    return;
+  }
+
+  const buttons = [$('run-live-btn'), $('run-mock-btn')];
+  buttons.forEach((b) => (b.disabled = true));
+  const liveLabel = $('run-live-btn').textContent;
+  (mode === 'live' ? $('run-live-btn') : $('run-mock-btn')).textContent = 'Running…';
+
+  $('results').classList.remove('hidden');
+  ['report-container', 'stats-container', 'charts-container', 'trace-container', 'phase-container', 'raw-container']
+    .forEach((id) => ($(id).innerHTML = ''));
+  $('status-container').innerHTML = '<div class="status-line"><span class="badge running">running</span><span class="muted">The agent is planning and calling tools. This can take up to a minute.</span></div>';
+
+  try {
+    const response = await fetch('/api/run', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        mode,
+        question,
+        max_turns: parseInt($('max-turns').value, 10),
+        max_tool_calls: parseInt($('max-tools').value, 10),
+        max_seconds: parseFloat($('max-seconds').value),
+        max_tokens: parseInt($('max-tokens').value, 10),
+        max_cost: parseFloat($('max-cost').value),
+      }),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || 'Unknown error');
+    render(body);
+  } catch (error) {
+    $('status-container').innerHTML = '<div class="notice error"><strong>Error:</strong> ' + esc(error.message) + '</div>';
+  } finally {
+    buttons.forEach((b) => (b.disabled = false));
+    $('run-live-btn').textContent = liveLabel;
+    $('run-mock-btn').textContent = 'Run offline demo (scripted)';
+  }
+}
+
+// ---------- rendering ----------
+const STATUS_LABELS = {
+  completed: 'Completed',
+  clarification_needed: 'Clarification needed',
+  blocked: 'Blocked',
+  budget_exhausted: 'Budget exhausted',
+  failed: 'Failed',
+};
+
+function render(result) {
+  renderStatus(result);
+  renderReport(result);
+  renderStats(result);
+  renderCharts(result);
+  renderTrace(result);
+  renderPhases(result);
+  $('raw-container').innerHTML = '<details><summary>Raw run JSON</summary><pre>' + json(result) + '</pre></details>';
+}
+
+function renderStatus(result) {
+  const mock = result.mode === 'mock'
+    ? '<span class="badge mock">scripted mock</span>'
+    : '<span class="muted">' + esc(result.model) + '</span>';
+  $('status-container').innerHTML =
+    '<div class="status-line"><span class="badge ' + esc(result.status) + '">' +
+    esc(STATUS_LABELS[result.status] || result.status) + '</span>' + mock +
+    '<span class="muted">stop reason: ' + esc(result.stop_reason) + '</span></div>';
+}
+
+function renderReport(result) {
+  const report = result.final_report;
+  let html = '';
+  if (report) {
+    html += '<h3 class="section">Answer</h3><p class="answer">' + esc(report.answer) + '</p>';
+    if (report.claims.length) {
+      html += '<h3 class="section">Claims checked against computed evidence</h3>' +
+        '<div class="table-wrap"><table class="data"><tr><th>Evidence key</th><th>Value</th><th>Unit</th></tr>' +
+        report.claims.map((c) => '<tr><td>' + esc(c.key) + '</td><td class="num">' + fmt(c.value) + '</td><td>' + esc(c.unit) + '</td></tr>').join('') +
+        '</table></div>';
+    }
+    if (report.answered_requirements.length) {
+      html += '<h3 class="section">Question parts answered</h3><ul class="plain">' +
+        report.answered_requirements.map((r) => '<li>' + esc(r) + '</li>').join('') + '</ul>';
+    }
+    if (report.limitations.length) {
+      html += '<h3 class="section">Limitations</h3><ul class="plain">' +
+        report.limitations.map((l) => '<li>' + esc(l) + '</li>').join('') + '</ul>';
+    }
+  } else if (result.user_message) {
+    html += '<h3 class="section">Message from the agent</h3><p class="answer">' + esc(result.user_message) + '</p>';
+  } else {
+    html += '<div class="notice">No report was produced. The run stopped with: <strong>' + esc(result.stop_reason) + '</strong>. See the steps below.</div>';
+  }
+  $('report-container').innerHTML = html;
+}
+
+function renderStats(result) {
+  const tile = (label, value) =>
+    '<div class="stat-tile"><div class="stat-label">' + label + '</div><div class="stat-value">' + value + '</div></div>';
+  $('stats-container').innerHTML = '<div class="stats-grid">' +
+    tile('Model turns', fmt(result.model_turns)) +
+    tile('Tool calls', fmt(result.tool_calls)) +
+    tile('Tokens', fmt(result.total_tokens)) +
+    tile('Est. cost', '$' + result.estimated_cost_usd.toFixed(4)) +
+    tile('Elapsed', result.elapsed_seconds.toFixed(1) + 's') +
+    '</div>';
+}
+
+function renderCharts(result) {
+  if (!result.charts || !result.charts.length) {
+    $('charts-container').innerHTML = '';
+    return;
+  }
+  const stamp = Date.now();  // charts reuse file names, so bypass the browser cache
+  $('charts-container').innerHTML = '<h3 class="section">Chart</h3>' +
+    result.charts.map((name) =>
+      '<div class="chart-container"><img src="/api/charts/' + encodeURIComponent(name) + '?t=' + stamp +
+      '" alt="Chart generated by the agent: ' + esc(name) + '"></div>').join('');
+}
+
+function table(rows, limit = 12) {
+  if (!rows || !rows.length) return '<span class="muted">No rows</span>';
+  const cols = Object.keys(rows[0]);
+  const shown = rows.slice(0, limit);
+  let html = '<div class="table-wrap"><table class="data"><tr>' + cols.map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr>';
+  html += shown.map((row) => '<tr>' + cols.map((c) =>
+    '<td class="' + (typeof row[c] === 'number' ? 'num' : '') + '">' + fmt(row[c]) + '</td>').join('') + '</tr>').join('');
+  html += '</table></div>';
+  if (rows.length > limit) html += '<div class="muted">… ' + (rows.length - limit) + ' more rows</div>';
+  return html;
+}
+
+function kv(pairs) {
+  const items = pairs.filter(([, v]) => v !== null && v !== undefined && v !== '');
+  return '<dl class="kv">' + items.map(([k, v]) => '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>').join('') + '</dl>';
+}
+
+function checks(map) {
+  return '<div class="checks">' + Object.entries(map).map(([name, ok]) =>
+    '<span class="check ' + (ok ? 'pass' : 'fail') + '">' + (ok ? '✓ ' : '✗ ') + esc(name.replace(/_/g, ' ')) + '</span>').join('') + '</div>';
+}
+
+function budget(b) {
+  if (!b) return '';
+  return 'turns ' + b.model_turns + ' · tools ' + b.tool_calls + ' · tokens ' + fmt(b.tokens) + ' · time ' + Math.round(b.time_remaining_seconds) + 's';
+}
+
+function step(cls, title, body, event) {
+  const time = event.timestamp_utc ? new Date(event.timestamp_utc).toLocaleTimeString() : '';
+  return '<div class="step ' + cls + '"><div class="step-title">#' + event.sequence + ' ' + esc(title) +
+    '<span class="time">' + esc(time) + '</span></div>' + body + '</div>';
+}
+
+function renderEvent(event) {
+  const p = event.payload;
+  switch (event.event_type) {
+    case 'request':
+      return step('', 'Request', kv([
+        ['Question', esc(p.question)],
+        ['Limits', esc('turns ' + p.limits.max_model_turns + ', tool calls ' + p.limits.max_tool_calls +
+          ', tokens ' + p.limits.max_total_tokens + ', ' + p.limits.max_elapsed_seconds + 's')],
+      ]), event);
+
+    case 'observation':
+      if (p.tool_name === 'inspect_dataset') {
+        return step('ok', 'Dataset inspection', kv([
+          ['Rows', fmt(p.row_count)],
+          ['Date range', esc(p.date_range.join(' → '))],
+          ['Metrics', esc(p.supported_metrics.join(', '))],
+          ['Dimensions', esc(p.supported_dimensions.join(', '))],
+        ]), event);
+      }
+      if (p.error_type) {
+        return step('bad', 'Model error', kv([['Type', esc(p.error_type)], ['Message', esc(p.message)], ['Retry', esc(p.retry)]]), event);
+      }
+      return renderToolObservation(event);
+
+    case 'decision': {
+      const target = p.analysis_plan ? 'analyze_data' : (p.chart_request ? 'create_visualization' : '');
+      return step('decision', 'Agent decision: ' + p.action.replace(/_/g, ' '), kv([
+        ['Observed', esc(p.observation)],
+        ['Reason', esc(p.reason)],
+        ['Expected gain', esc(p.expected_information_gain)],
+        ['Next tool', esc(target)],
+        ['Message', esc(p.message)],
+        ['Budget left', esc(budget(p.remaining_budget))],
+      ]), event);
+    }
+
+    case 'tool_call': {
+      const args = '<details><summary>Arguments</summary><pre>' + json(p.raw_arguments) + '</pre></details>';
+      return step('tool_call', 'Tool call: ' + p.tool, kv([
+        ['Retry', p.retry_number ? esc(p.retry_number) : ''],
+      ]) + args, event);
+    }
+
+    case 'validation': {
+      const ev = p.evidence_validation, gate = p.completion_gate;
+      let body = '<div><strong>Evidence validation</strong> ' + (ev.valid ? '✓ passed' : '✗ failed') + '</div>' + checks(ev.checks);
+      if (ev.errors.length) body += '<ul class="plain">' + ev.errors.map((e) => '<li>' + esc(e) + '</li>').join('') + '</ul>';
+      if (ev.warnings.length) body += '<div class="muted">' + ev.warnings.map(esc).join('<br>') + '</div>';
+      body += '<div style="margin-top:8px"><strong>Completion gate</strong> ' + (gate.valid ? '✓ passed' : '✗ failed' + (gate.repairable ? ' (revision requested)' : '')) + '</div>' + checks(gate.checks);
+      if (gate.errors.length) body += '<ul class="plain">' + gate.errors.map((e) => '<li>' + esc(e) + '</li>').join('') + '</ul>';
+      return step('validation', 'Validation (report revision ' + p.report_revision + ')', body, event);
+    }
+
+    case 'final':
+      return step('final', 'Final report accepted', '<span class="muted">Shown in the Answer section above.</span>', event);
+
+    default:
+      return step('', event.event_type, '<pre>' + json(p) + '</pre>', event);
+  }
+}
+
+function renderToolObservation(event) {
+  const p = event.payload;
+  const ms = p.execution_elapsed_ms !== undefined ? Math.round(p.execution_elapsed_ms) + ' ms' : '';
+  if (!p.ok) {
+    return step('bad', 'Tool error: ' + p.tool_name, kv([
+      ['Code', esc(p.error_code)],
+      ['Recoverable', esc(p.recoverable)],
+      ['Detail', '<pre>' + json(p.detail) + '</pre>'],
+    ]), event);
+  }
+  if (p.result_type === 'AnalysisResult') {
+    const r = p.result;
+    const cov = r.coverage;
+    return step('ok', 'Observation: analysis result', kv([
+      ['Objective', esc(r.plan.objective)],
+      ['Time', esc(ms)],
+      ['Coverage', esc(fmt(cov.included_rows) + ' of ' + fmt(cov.candidate_rows) + ' rows included (' + (cov.excluded_rate * 100).toFixed(1) + '% excluded)')],
+      ['Rule', esc(cov.eligibility_rule)],
+      ['Derived', Object.keys(r.derived).length ? esc(JSON.stringify(r.derived)) : ''],
+    ]) + table(r.rows) +
+      (p.evidence_keys_created && p.evidence_keys_created.length
+        ? '<details><summary>' + p.evidence_keys_created.length + ' evidence keys created</summary><pre>' + esc(p.evidence_keys_created.join('\n')) + '</pre></details>' : ''), event);
+  }
+  if (p.result_type === 'ChartResult') {
+    return step('ok', 'Observation: chart created', kv([
+      ['Type', esc(p.result.chart_type)],
+      ['Rows plotted', fmt(p.result.plotted_rows)],
+      ['Time', esc(ms)],
+    ]), event);
+  }
+  return step('ok', 'Observation', '<pre>' + json(p) + '</pre>', event);
+}
+
+function renderTrace(result) {
+  $('trace-container').innerHTML = '<h3 class="section">Agent steps (' + result.trace.length + ' events)</h3>' +
+    '<div class="timeline">' + result.trace.map(renderEvent).join('') + '</div>';
+}
+
+function renderPhases(result) {
+  if (!result.phase_history || !result.phase_history.length) {
+    $('phase-container').innerHTML = '';
+    return;
+  }
+  const h = result.phase_history;
+  const chain = [h[0].from_phase].concat(h.map((t) => t.to_phase));
+  $('phase-container').innerHTML = '<h3 class="section">Workflow phases</h3><div class="phases">' +
+    chain.map((phase) => '<span class="phase">' + esc(phase) + '</span>').join('<span class="arrow">→</span>') + '</div>';
+}
+
+// ---------- wiring ----------
+EXAMPLES.forEach((text) => {
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'chip';
+  chip.textContent = text.length > 60 ? text.slice(0, 57) + '…' : text;
+  chip.title = text;
+  chip.addEventListener('click', () => { $('question').value = text; $('question').focus(); });
+  $('examples').appendChild(chip);
+});
+$('question').value = EXAMPLES[0];
+$('save-btn').addEventListener('click', saveConfig);
+$('run-live-btn').addEventListener('click', () => run('live'));
+$('run-mock-btn').addEventListener('click', () => run('mock'));
+loadConfig();
+</script>
+</body>
+</html>
